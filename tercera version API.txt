@@ -1,3 +1,44 @@
+TERCERA VERSIÓN: INSERTE EN LA BD
+producto:
+http://localhost/inventario/controller/producto.php?op=Insert
+GET>BODY>RAW>JSON
+{
+    "producto_codigo" : "198265",
+    "producto_nombre" : "Alcohol en Gel",
+    "producto_precio" : 10,
+    "producto_stock" : 5,
+    "producto_foto" : "Ag.png"
+}
+==============
+BODY>RAW
+======================================
+<?php
+header('Content-Type: application/json');
+ 
+require_once("../config/conexion.php");
+require_once('../models/Producto.php');
+$producto = new Producto();
+
+$body=json_decode(file_get_contents("php://input"),true);
+
+switch ($_GET["op"]) { // Corregido: $_GET en lugar de $$_GET
+    case 'GetAll':
+        $datos = $producto->get_producto();
+        echo json_encode($datos);
+        break;
+    case "GetId":
+        $datos=$producto->get_producto_x_id($body["producto_id"]);
+        echo json_encode($datos);
+        break; 
+    case "Insert":
+        $datos=$producto->insert_producto($body["producto_codigo"],$body["producto_nombre"],$body["producto_precio"],$body["producto_stock"],$body["producto_foto"]);
+        echo "Correcto";
+        break; 
+}   
+?>
+
+Producto
+=====================================
 <?php
     class Producto extends Conectar{
         public function get_producto(){
@@ -29,30 +70,6 @@
             $sql->bindValue(3,$producto_precio);
             $sql->bindValue(4,$producto_stock);
             $sql->bindValue(5,$producto_foto);
-            $sql->execute();
-            return $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
-        }
-        public function update_producto($producto_id, $producto_codigo, $producto_nombre, $producto_precio, $producto_stock, $producto_foto) {
-            $conectar = parent::conexion();
-            parent::set_name();
-            $sql = "UPDATE `producto` SET producto_codigo=?, producto_nombre=?, producto_precio=?, producto_stock=?, producto_foto=? WHERE producto_id=?";
-            $sql = $conectar->prepare($sql);
-            $sql->bindValue(1, $producto_codigo);
-            $sql->bindValue(2, $producto_nombre);
-            $sql->bindValue(3, $producto_precio);
-            $sql->bindValue(4, $producto_stock);
-            $sql->bindValue(5, $producto_foto);
-            $sql->bindValue(6, $producto_id);
-            $sql->execute();
-            return $resultado = $sql->fetchAll(PDO::FETCH_ASSOC);
-        }    
-           
-        public function delete_producto($producto_id){
-            $conectar=parent::conexion();
-            parent::set_name();
-            $sql = "UPDATE `producto` SET est='0' WHERE producto_id=?";
-            $sql=$conectar->prepare($sql);
-            $sql->bindValue(1,$producto_id);
             $sql->execute();
             return $resultado=$sql->fetchAll(PDO::FETCH_ASSOC);
         }
